@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="bookApp">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Manager</title>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  
+  
+</head>
+
+<body ng-controller="BookController">
+  <h1>Book Manager</h1>
+
+
+  <form ng-submit="addBook()">
+    <input type="text" ng-model="newBookTitle" placeholder="Enter book title" required>
+    <button type="submit">Add Book</button>
+  </form>
+
+  <h2>Available Books</h2>
+  <div ng-repeat="book in books" class="book">
+    <input type="text" ng-model="book.title">
+    <div>
+      <button ng-click="updateBook(book)">Update</button>
+      <button ng-click="deleteBook(book._id)">Delete</button>
+    </div>
+  </div>
+
+  <script>
+    const app = angular.module('bookApp', []);
+
+    app.controller('BookController', function($scope, $http) {
+      const API_URL = 'http://localhost:3000/books';
+
+ 
+      $scope.loadBooks = function() {
+        $http.get(API_URL)
+          .then(res => {
+            $scope.books = res.data;
+          })
+          .catch(err => console.error(err));
+      };
+
+      $scope.addBook = function() {
+        if (!$scope.newBookTitle) return;
+        $http.post(API_URL, { title: $scope.newBookTitle })
+          .then(() => {
+            $scope.newBookTitle = '';
+            $scope.loadBooks();
+          });
+      };
+
+ 
+      $scope.updateBook = function(book) {
+        $http.put(`${API_URL}/${book._id}`, { title: book.title })
+          .then(() => {
+            $scope.loadBooks();
+          });
+      };
+
+      $scope.deleteBook = function(id) {
+        $http.delete(`${API_URL}/${id}`)
+          .then(() => {
+            $scope.loadBooks();
+          });
+      };
+
+
+      $scope.loadBooks();
+    });
+  </script>
+</body>
+</html>
