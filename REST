@@ -1,0 +1,43 @@
+
+const express = require('express');
+const app = express();
+app.use(express.json()); 
+
+const friends = [
+  { id: 1, name: 'Naveen' },
+  { id: 2, name: 'Naveen' },
+];
+
+app.get('/', (req, res) => {
+  res.send('Friends API is running!');
+});
+
+app.get('/api/friends', (req, res) => {
+  res.json(friends);
+});
+
+app.post('/api/friends', (req, res) => {
+  const name = req.body.name;
+  if (!name || name.trim().length < 2) {
+    return res.status(400)
+  }
+  const friend = { id: friends.length + 1, name: name.trim() };
+  friends.push(friend);
+  res.status(201).json(friend);
+});
+
+app.put('/api/friends/:id', (req, res) => {
+  const friend = friends.find(f => f.id === parseInt(req.params.id));
+  if (!friend) return res.status(404).json({ error: 'Friend not found' });
+
+  const name = req.body.name;
+  if (!name || name.trim().length < 2) {
+    return res.status(400).json({ error: 'Name is required and must be at least 2 characters' });
+  }
+
+  friend.name = name.trim();
+  res.json(friend);
+});
+
+const port = process.env.PORT || 8080;
+app.listen(port, () => console.log(`Listening on port ${port}...`));
